@@ -194,7 +194,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 (http.host eq "cloud.example.com"
  and not (
    cf.tls_client_auth.cert_verified
-   and lower(cf.tls_client_auth.cert_serial) in {"2810f59f687f3fc331d5fa169cf7ba7879342d73"}
+   and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
   )
 )
 ```
@@ -205,7 +205,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
  and not (
    cf.tls_client_auth.cert_verified
    and lower(cf.tls_client_auth.cert_issuer_dn) contains "your client ca name"
-   and lower(cf.tls_client_auth.cert_serial) in {"2810f59f687f3fc331d5fa169cf7ba7879342d73"}
+   and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
   )
 )
 ```
