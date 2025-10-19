@@ -6,6 +6,7 @@
 
 # Allow the root README
 !README.md
+!runbook.md
 
 # Allow docs/ and everything inside
 !docs/
