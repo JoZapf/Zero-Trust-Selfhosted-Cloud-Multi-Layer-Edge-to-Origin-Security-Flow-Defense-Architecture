@@ -1,0 +1,12 @@
+# Ignore everything by default
+*
+
+# Allow this .gitignore itself
+!.gitignore
+
+# Allow the root README
+!README.md
+
+# Allow docs/ and everything inside
+!docs/
+!docs/**
