@@ -1,6 +1,6 @@
 # Zero-Trust Selfhosted Cloud – Multi-Layer Edge-to-Origin Security Flow & Defense Architecture
 
-A practical, reproducible **Zero‑Trust** pattern for **self-hosted Nextcloud** behind **Cloudflare**. Traffic is forced through **proxied DNS**, **mTLS at the edge**, **Cloudflare Access** (OTP/session), and an **egress‑only Cloudflare Tunnel** to an origin where **Nginx** front-ends Nextcloud in **Docker** with **explicit trust anchors** and **micro‑segmented backends**.
+A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** behind **Cloudflare**. Traffic is forced through **proxied DNS**, **mTLS at the edge**, **Cloudflare Access** (OTP/session), and an **egress‑only Cloudflare Tunnel** to an origin where **Nginx** front-ends Cloud in **Docker** with **explicit trust anchors** and **micro‑segmented backends**.
 
 ---
 
@@ -23,12 +23,12 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Nextcloud**
 
 ## Architecture Overview
 
-**Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Nextcloud → (Redis/DB)**
+**Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis/DB)**
 
-- **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → Nextcloud.  
-- **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → Nextcloud.  
-- **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → Nextcloud.  
-- **LAN maintenance**: `https://192.168.178.1:1011` → Nginx → Nextcloud (allowlisted via `DOCKER-USER`).
+- **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → Cloud.  
+- **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → Cloud.  
+- **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → Ccloud.  
+- **LAN maintenance**: `https://192.168.178.1:1011` → Nginx → Cloud (allowlisted via `DOCKER-USER`).
 
 Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-default** at every hop.
 
@@ -41,7 +41,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 - **User identity & context (L7 Access)** — OTP/MFA, IdP groups, posture/WARP; **no session ⇒ no tunnel**.  
 - **Egress-only path (L3/L4)** — Cloudflare Tunnel to **`https://127.0.0.1:1011`**; fail-closed if tunnel drops.  
 - **Reverse-proxy boundary (L7)** — Nginx isolates the app, sets `X-Forwarded-*`, HSTS, limits/timeouts.  
-- **Explicit app trust (L7)** — Nextcloud `trusted_proxies`, `trusted_domains`, `overwriteprotocol=https`.  
+- **Explicit app trust (L7)** — Cloud `trusted_proxies`, `trusted_domains`, `overwriteprotocol=https`.  
 - **Micro-segmented backends (L4–L7)** — Redis/DB on private Docker network; least-privilege communication only.
 
 ---
@@ -50,7 +50,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 - **DNS & Proxy:** Managed in Cloudflare; records **proxied** (orange cloud).  
 - **Hostnames:** `cloud.example.com` (browser), `sync.example.com` (apps), `share.example.com` (public links).  
-- **Origin:** Dockerized Nextcloud behind **Nginx** bound to **`127.0.0.1:1011`** and (optionally) **`192.168.178.1:1011`** for LAN.  
+- **Origin:** Dockerized Cloud behind **Nginx** bound to **`127.0.0.1:1011`** and (optionally) **`192.168.178.1:1011`** for LAN.  
 - **Tunnel:** Cloudflare Tunnel with ingress → `https://127.0.0.1:1011` (internal only, `noTLSVerify: true`).
 
 > Replace `example.com` with your domain (e.g., `sine-math.com`).
@@ -66,10 +66,10 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 ### B. Cloudflare Tunnel
 4. **Install cloudflared** (package or Docker) on the origin host.  
-5. **Authenticate**: `cloudflared tunnel login` → create tunnel (e.g., `nextcloud`).  
+5. **Authenticate**: `cloudflared tunnel login` → create tunnel (e.g., `cloud`).  
 6. **Config** `/etc/cloudflared/config.yml` (or mounted file) with ingress:  
    ```yaml
-   tunnel: nextcloud
+   tunnel: cloud
    credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
    ingress:
      - hostname: cloud.example.com
@@ -93,12 +93,12 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
     server {
       listen 1011 ssl; http2 on;
       server_name _;
-      ssl_certificate     /etc/nginx/certs/nextcloud.crt;
-      ssl_certificate_key /etc/nginx/certs/nextcloud.key;
+      ssl_certificate     /etc/nginx/certs/cloud.crt;
+      ssl_certificate_key /etc/nginx/certs/cloud.key;
       add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload" always;
 
       location / {
-        proxy_pass http://nextcloud-app:80;
+        proxy_pass http://cloud-app:80;
         proxy_set_header Host              $http_host;
         proxy_set_header X-Real-IP         $remote_addr;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
@@ -117,7 +117,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
     sudo iptables -A DOCKER-USER -p tcp --dport 1011 -j DROP
     ```
 
-### D. Nextcloud Hardening
+### D. Cloud Hardening
 12. **Trusted domains** (inside the container, as `www-data`):
     ```bash
     php occ config:system:set trusted_domains 0 --value=cloud.example.com
@@ -137,7 +137,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 ### E. Cloudflare Access & mTLS
 14. **mTLS** — Enable **Client Certificates Required** for `cloud.example.com`.  
 15. **Client CA** — Use Cloudflare’s client CA or upload your own.  
-16. **(Optional) Serial allowlist** via WAF rule (see Appendix).  
+16. **Serial allowlist** via WAF rule (see Appendix).  
 17. **Access Application (Self-hosted)** for `cloud.example.com`:
     - **Login methods:** OTP (or your IdP).  
     - **Session duration:** per policy.  
@@ -147,7 +147,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 ### F. Health & Observability
 20. **`cloudflared` status/logs** on the host; **Zero Trust → Logs** for Access/mTLS decisions.  
-21. **Nginx** `nginx -t` and logs; **Nextcloud** logs for trusted domain/proxy issues.
+21. **Nginx** `nginx -t` and logs; **Cloud** logs for trusted domain/proxy issues.
 
 ---
 
@@ -172,7 +172,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
   ```
 
 - **Sync path (bypass Access):**
-  App connects to `https://sync.example.com` under your policy (mTLS/device posture), then Tunnel → Nginx → Nextcloud.
+  App connects to `https://sync.example.com` under your policy (mTLS/device posture), then Tunnel → Nginx → Cloud.
 
 ---
 
@@ -182,7 +182,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 - **No inbound origin ports**; egress-only Tunnel **fail-closed**.  
 - **One device, one cert**; consider non-exportable keys (TPM/Keychain).  
 - **Whitelist Issuer + Serial** if you use serial filters; rotate on renewal.  
-- **Keep Nextcloud trust anchors tight**; watch audit logs and headers.  
+- **Keep Cloud trust anchors tight**; watch audit logs and headers.  
 - **Backups/restore paths** separated from runtime network.
 
 ---
