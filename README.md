@@ -23,7 +23,7 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 
 ## Architecture Overview
 
-**Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis/DB)**
+**Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis, DB, etc)**
 
 - **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → Cloud.  
 - **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → Cloud.  
