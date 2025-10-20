@@ -28,7 +28,7 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 - **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
 - **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
 - **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
-- **LAN maintenance**: `https://192.168.178.1:1011` → Client root CA → Nginx → Cloud (allowlisted via `DOCKER-USER`).
+- **LAN maintenance**: `https://192.168.178.1:1011` → Client root CA → Nginx → usr MFA → Cloud (allowlisted via `DOCKER-USER`).
 
 Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-default** at every hop.
 
@@ -42,7 +42,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 - **Egress-only path (L3/L4)** — Cloudflare Tunnel to **`https://127.0.0.1:1011`**; fail-closed if tunnel drops.  
 - **Reverse-proxy boundary (L7)** — Nginx isolates the app, sets `X-Forwarded-*`, HSTS, limits/timeouts.  
 - **Explicit app trust (L7)** — Cloud `trusted_proxies`, `trusted_domains`, `overwriteprotocol=https`.  
-- **Micro-segmented backends (L4–L7)** — Redis/DB on private Docker network; least-privilege communication only.
+- **Micro-segmented backends (L4–L7)** — Redis/DB/... on private Docker network; least-privilege communication only.
 
 ---
 
