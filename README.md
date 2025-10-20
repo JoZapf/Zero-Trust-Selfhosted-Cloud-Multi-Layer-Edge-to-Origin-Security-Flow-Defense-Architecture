@@ -25,10 +25,10 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 
 **Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis, DB, etc)**
 
-- **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → Cloud.  
-- **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → Cloud.  
-- **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → Ccloud.  
-- **LAN maintenance**: `https://192.168.178.1:1011` → Nginx → Cloud (allowlisted via `DOCKER-USER`).
+- **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
+- **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
+- **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
+- **LAN maintenance**: `https://192.168.178.1:1011` → Client root CA → Nginx → Cloud (allowlisted via `DOCKER-USER`).
 
 Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-default** at every hop.
 
