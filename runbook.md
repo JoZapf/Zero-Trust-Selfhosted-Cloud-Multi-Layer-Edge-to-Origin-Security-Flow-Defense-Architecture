@@ -1,6 +1,6 @@
 # Zero‑Trust Nextcloud behind Cloudflare — Clean Runbook (40 Steps)
 
-> **Scope (clean path):** Cloudflare proxied DNS → Edge mTLS (client cert) → Cloudflare Access (OTP/session) → **egress‑only** Cloudflare Tunnel → Nginx (loopback/LAN) → Nextcloud (Docker) → Redis/DB (private).  
+> **Scope (clean path):** Cloudflare proxied DNS → Edge mTLS (client cert) → Cloudflare Access (OTP/session) → **egress‑only** Cloudflare Tunnel → Nginx (loopback/LAN) → Cloud (Docker) → Redis/DB (private).  
 > **Anonymized LAN:** `192.168.178.1:1011` (RFC 5737 TEST‑NET‑1) and loopback `127.0.0.1:1011`.  
 > **Hostnames:** `cloud.example.com` (browser), `sync.example.com` (apps), `share.example.com` (public links).  
 > **No personal data**; all identifiers are placeholders.
@@ -10,7 +10,7 @@
 ## Prerequisites
 - Cloudflare account with Zero Trust (free/paid as needed).
 - Domain delegated to Cloudflare (or ready to be delegated).
-- Origin host with Docker/Compose and Nginx reverse proxy for Nextcloud.
+- Origin host with Docker/Compose and Nginx reverse proxy for Cloud.
 - `cloudflared` available (package or Docker).
 
 ---
@@ -58,7 +58,7 @@
 15. **Route DNS to the tunnel** (Zero Trust → Tunnels → *Public hostnames*).  
 16. **Verify status**:
     ```bash
-    cloudflared tunnel info nextcloud
+    cloudflared tunnel info cloud
     docker logs --tail=100 cloudflared   # if Docker
     # Expect: connections to multiple Cloudflare edge colos
     ```
@@ -67,7 +67,7 @@
 17. **Bind Nginx** only to **loopback** and **LAN**:
     - `127.0.0.1:1011` (for tunnel)
     - `192.168.178.1:1011` (optional LAN maintenance)
-18. **Enable origin TLS** at Nginx (LE or self‑signed); reverse‑proxy to Nextcloud:
+18. **Enable origin TLS** at Nginx (LE or self‑signed); reverse‑proxy to Cloud:
     ```nginx
     server {
       listen 1011 ssl; http2 on;
@@ -77,7 +77,7 @@
       add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload" always;
 
       location / {
-        proxy_pass http://nextcloud-app:80;
+        proxy_pass http://cloud-app:80;
         proxy_set_header Host              $http_host;
         proxy_set_header X-Real-IP         $remote_addr;
         proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
@@ -107,7 +107,7 @@
     docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep nginx
     ss -lntp | grep ':1011'
     ```
-22. **Private Docker networks** for Nextcloud ↔ Redis/DB (no public ports on backends).
+22. **Private Docker networks** for Cloud ↔ Redis/DB (no public ports on backends).
 
 ### D — Nextcloud trust anchors
 23. **trusted_domains** (inside app container as `www-data`):
@@ -173,7 +173,7 @@
     curl -Ik https://192.168.178.1:1011/
     # Expect: 302 → /login
     ```
-39. **Monitor logs:** `cloudflared` status, Cloudflare Zero Trust **Logs** (mTLS/Access decisions), Nginx & Nextcloud logs.  
+39. **Monitor logs:** `cloudflared` status, Cloudflare Zero Trust **Logs** (mTLS/Access decisions), Nginx & Cloud logs.  
 40. **Secret hygiene & rollback:** remove working copies of P12; document rotation; rollback by pausing WAF rule or adjusting Access; tunnel down ⇒ origin stays non‑exposed; LAN remains controlled.
 
 ---
