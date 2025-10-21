@@ -1,4 +1,4 @@
-# Zero‑Trust Nextcloud behind Cloudflare — Clean Runbook (40 Steps)
+# Zero‑Trust selfhosted Cloud behind Cloudflare — Clean Runbook (40 Steps)
 
 > **Scope (clean path):** Cloudflare proxied DNS → Edge mTLS (client cert) → Cloudflare Access (OTP/session) → **egress‑only** Cloudflare Tunnel → Nginx (loopback/LAN) → Cloud (Docker) → Redis/DB (private).  
 > **Anonymized LAN:** `192.168.178.1:1011` (RFC 5737 TEST‑NET‑1) and loopback `127.0.0.1:1011`.  
