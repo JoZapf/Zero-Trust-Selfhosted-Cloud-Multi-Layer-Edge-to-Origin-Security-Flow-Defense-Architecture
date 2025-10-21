@@ -7,6 +7,7 @@
 # Allow the root README
 !README.md
 !runbook.md
+!defense-in-depth.md
 
 # Allow docs/ and everything inside
 !docs/
