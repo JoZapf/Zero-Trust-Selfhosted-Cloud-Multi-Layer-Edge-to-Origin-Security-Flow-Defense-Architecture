@@ -47,9 +47,9 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 
 **Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis, DB, etc)**
 
-- **Browser flow**: `cloud.example.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
-- **Sync apps**: `sync.example.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
-- **Public shares**: `share.example.com` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
+- **Browser flow**: `cloud.your-domain.om` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
+- **Sync apps**: `sync.your-domain.om` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
+- **Public shares**: `share.your-domain.om` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
 - **LAN maintenance**: `https://192.168.178.1:1011` → Client root CA → Nginx → usr MFA → Cloud (allowlisted via `DOCKER-USER`).
 
 Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-default** at every hop.
@@ -71,11 +71,35 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 ## Environment & Assumptions
 
 - **DNS & Proxy:** Managed in Cloudflare; records **proxied** (orange cloud).  
-- **Hostnames:** `cloud.example.com` (browser), `sync.example.com` (apps), `share.example.com` (public links).  
+- **Hostnames:** `cloud.your-domain.om` (browser), `sync.your-domain.om` (apps), `share.your-domain.om` (public links).  
 - **Origin:** Dockerized Cloud behind **Nginx** bound to **`127.0.0.1:1011`** and (optionally) **`192.168.178.1:1011`** for LAN.  
 - **Tunnel:** Cloudflare Tunnel with ingress → `https://127.0.0.1:1011` (internal only, `noTLSVerify: true`).
 
-> Replace `example.com` with your domain (e.g., `sine-math.com`).
+> Replace `your-domain.om` with your domain (e.g., `your-domain.om`).
+
+```mermain
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    C1["cloud.your-domain.com"]
+    C2["sync.your-domain.com"]
+
+    CNAME["<tunnel-id<br>(DNS CNAME Target)"]
+    EDGE["Cloudflare Edge<br>(TLS Termination + WAF)"]
+    TUNNEL["Cloudflare Tunnel Cloud (cloudflared)"]
+    INGRESS["ingress rules from config.yml cloud/sync -> https://127.0.0.1:1011"]
+    ORIGIN["https://127.0.0.1:1011 Cloud-Nginx"]
+    APP["Cloud-App<br>(PHP Container)"]
+
+    C1 -->|DNS CNAME| CNAME
+    C2 -->|DNS CNAME| CNAME
+
+    CNAME --> EDGE
+    EDGE --> TUNNEL
+    TUNNEL --> INGRESS
+    INGRESS --> ORIGIN
+    ORIGIN --> APP
+
+```
 
 ---
 
@@ -94,13 +118,13 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
    tunnel: cloud
    credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
    ingress:
-     - hostname: cloud.example.com
+     - hostname: cloud.your-domain.om
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
-     - hostname: sync.example.com
+     - hostname: sync.your-domain.om
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
-     - hostname: share.example.com
+     - hostname: share.your-domain.om
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
      - service: http_status:404
@@ -142,8 +166,8 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 ### D. Cloud Hardening
 12. **Trusted domains** (inside the container, as `www-data`):
     ```bash
-    php occ config:system:set trusted_domains 0 --value=cloud.example.com
-    php occ config:system:set trusted_domains 1 --value=sync.example.com
+    php occ config:system:set trusted_domains 0 --value=cloud.your-domain.om
+    php occ config:system:set trusted_domains 1 --value=sync.your-domain.om
     php occ config:system:set trusted_domains 2 --value=192.168.178.1
     php occ config:system:set trusted_domains 3 --value=192.168.178.1:1011
     ```
@@ -157,15 +181,15 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
     ```
 
 ### E. Cloudflare Access & mTLS
-14. **mTLS** — Enable **Client Certificates Required** for `cloud.example.com`.  
+14. **mTLS** — Enable **Client Certificates Required** for `cloud.your-domain.om`.  
 15. **Client CA** — Use Cloudflare’s client CA or upload your own.  
 16. **Serial allowlist** via WAF rule (see Appendix).  
-17. **Access Application (Self-hosted)** for `cloud.example.com`:
+17. **Access Application (Self-hosted)** for `cloud.your-domain.om`:
     - **Login methods:** OTP (or your IdP).  
     - **Session duration:** per policy.  
     - **Cookies:** HTTPOnly; SameSite=Lax/Strict; optionally binding cookie.  
-18. **Bypass policy** for `sync.example.com` (apps), gated by device/WARP/mTLS as needed.  
-19. **Mild policy** for `share.example.com` (public links).
+18. **Bypass policy** for `sync.your-domain.om` (apps), gated by device/WARP/mTLS as needed.  
+19. **Mild policy** for `share.your-domain.om` (public links).
 
 ### F. Health & Observability
 20. **`cloudflared` status/logs** on the host; **Zero Trust → Logs** for Access/mTLS decisions.  
@@ -177,13 +201,13 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 - **mTLS block (no client cert):**
   ```bash
-  curl -Ik https://cloud.example.com
+  curl -Ik https://cloud.your-domain.om
   # Expect: 403 at edge
   ```
 
 - **mTLS pass + Access redirect (with P12):**
   ```bash
-  curl -Ik --cert client.p12 --cert-type P12 --pass "<p12_password>" https://cloud.example.com
+  curl -Ik --cert client.p12 --cert-type P12 --pass "<p12_password>" https://cloud.your-domain.om
   # Expect: 302 → /cdn-cgi/access/login/...
   ```
 
@@ -194,7 +218,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
   ```
 
 - **Sync path (bypass Access):**
-  App connects to `https://sync.example.com` under your policy (mTLS/device posture), then Tunnel → Nginx → Cloud.
+  App connects to `https://sync.your-domain.om` under your policy (mTLS/device posture), then Tunnel → Nginx → Cloud.
 
 ---
 
@@ -213,7 +237,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 **Block unless mTLS is verified & serial is allowlisted (optional serial clause):**
 ```txt
-(http.host eq "cloud.example.com"
+(http.host eq "cloud.your-domain.om"
  and not (
    cf.tls_client_auth.cert_verified
    and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
@@ -223,7 +247,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 **Variant with Issuer check (safer):**
 ```txt
-(http.host eq "cloud.example.com"
+(http.host eq "cloud.your-domain.om"
  and not (
    cf.tls_client_auth.cert_verified
    and lower(cf.tls_client_auth.cert_issuer_dn) contains "your client ca name"
@@ -232,4 +256,4 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 )
 ```
 
-> Replace `example.com` accordingly; adjust the allowlist to your actual serial(s) and issuer.
+> Replace `your-domain.om` accordingly; adjust the allowlist to your actual serial(s) and issuer.
