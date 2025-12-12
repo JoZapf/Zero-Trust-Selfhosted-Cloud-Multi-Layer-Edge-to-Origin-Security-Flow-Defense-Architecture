@@ -1,4 +1,4 @@
-# Zero-Trust Policy Table – your-cloud-domain.com (2025-12-12)
+# Zero-Trust Policy Table – your-cloud-domain.com
 
 ## Overview
 
