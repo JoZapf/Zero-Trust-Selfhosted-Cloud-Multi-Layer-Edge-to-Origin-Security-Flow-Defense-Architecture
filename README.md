@@ -86,7 +86,7 @@ flowchart LR
     CNAME["<tunnel-id<br>(DNS CNAME Target)"]
     EDGE["Cloudflare Edge<br>(TLS Termination + WAF)"]
     TUNNEL["Cloudflare Tunnel Cloud<br>(cloudflared)"]
-    INGRESS["ingress rules<br>from config.yml<br>cloud/sync -> https://127.0.0.1:1011"]
+    INGRESS["ingress rules<br>from config.yml<br>cloud/sync -><br>https://127.0.0.1:1011"]
     ORIGIN["https://127.0.0.1:1011<br>Cloud-Nginx"]
     APP["Cloud-App<br>(PHP Container)"]
 
