@@ -8,6 +8,7 @@
 !README.md
 !runbook.md
 !defense-in-depth.md
+!SECURITY.md
 
 # Allow docs/ and everything inside
 !docs/
