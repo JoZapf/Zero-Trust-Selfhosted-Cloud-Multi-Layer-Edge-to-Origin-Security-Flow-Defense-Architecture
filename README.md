@@ -47,9 +47,9 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 
 **Clients → Cloudflare Edge → Cloudflare Tunnel → Nginx → Cloud → (Redis, DB, etc)**
 
-- **Browser flow**: `cloud.your-domain.om` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
-- **Sync apps**: `sync.your-domain.om` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
-- **Public shares**: `share.your-domain.om` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
+- **Browser flow**: `cloud.your-domain.com` → Edge **mTLS** → **Access (OTP)** → **Tunnel** → Nginx → usr MFA → Cloud.  
+- **Sync apps**: `sync.your-domain.com` → Edge mTLS → **bypass Access** (policy-controlled) → Tunnel → Nginx → usr MFA → Cloud.  
+- **Public shares**: `share.your-domain.com` → Edge bypass/mild policy → Tunnel → Nginx → usr MFA → Cloud.  
 - **LAN maintenance**: `https://192.168.178.1:1011` → Client root CA → Nginx → usr MFA → Cloud (allowlisted via `DOCKER-USER`).
 
 Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-default** at every hop.
@@ -71,11 +71,11 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 ## Environment & Assumptions
 
 - **DNS & Proxy:** Managed in Cloudflare; records **proxied** (orange cloud).  
-- **Hostnames:** `cloud.your-domain.om` (browser), `sync.your-domain.om` (apps), `share.your-domain.om` (public links).  
+- **Hostnames:** `cloud.your-domain.com` (browser), `sync.your-domain.com` (apps), `share.your-domain.com` (public links).  
 - **Origin:** Dockerized Cloud behind **Nginx** bound to **`127.0.0.1:1011`** and (optionally) **`192.168.178.1:1011`** for LAN.  
 - **Tunnel:** Cloudflare Tunnel with ingress → `https://127.0.0.1:1011` (internal only, `noTLSVerify: true`).
 
-> Replace `your-domain.om` with your domain (e.g., `your-domain.om`).
+> Replace `your-domain.com` with your domain (e.g., `your-domain.com`).
 
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
@@ -118,13 +118,13 @@ flowchart LR
    tunnel: cloud
    credentials-file: /etc/cloudflared/<TUNNEL_ID>.json
    ingress:
-     - hostname: cloud.your-domain.om
+     - hostname: cloud.your-domain.com
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
-     - hostname: sync.your-domain.om
+     - hostname: sync.your-domain.com
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
-     - hostname: share.your-domain.om
+     - hostname: share.your-domain.com
        service: https://127.0.0.1:1011
        originRequest: { noTLSVerify: true }
      - service: http_status:404
@@ -166,8 +166,8 @@ flowchart LR
 ### D. Cloud Hardening
 12. **Trusted domains** (inside the container, as `www-data`):
     ```bash
-    php occ config:system:set trusted_domains 0 --value=cloud.your-domain.om
-    php occ config:system:set trusted_domains 1 --value=sync.your-domain.om
+    php occ config:system:set trusted_domains 0 --value=cloud.your-domain.com
+    php occ config:system:set trusted_domains 1 --value=sync.your-domain.com
     php occ config:system:set trusted_domains 2 --value=192.168.178.1
     php occ config:system:set trusted_domains 3 --value=192.168.178.1:1011
     ```
@@ -181,15 +181,15 @@ flowchart LR
     ```
 
 ### E. Cloudflare Access & mTLS
-14. **mTLS** — Enable **Client Certificates Required** for `cloud.your-domain.om`.  
+14. **mTLS** — Enable **Client Certificates Required** for `cloud.your-domain.com`.  
 15. **Client CA** — Use Cloudflare’s client CA or upload your own.  
 16. **Serial allowlist** via WAF rule (see Appendix).  
-17. **Access Application (Self-hosted)** for `cloud.your-domain.om`:
+17. **Access Application (Self-hosted)** for `cloud.your-domain.com`:
     - **Login methods:** OTP (or your IdP).  
     - **Session duration:** per policy.  
     - **Cookies:** HTTPOnly; SameSite=Lax/Strict; optionally binding cookie.  
-18. **Bypass policy** for `sync.your-domain.om` (apps), gated by device/WARP/mTLS as needed.  
-19. **Mild policy** for `share.your-domain.om` (public links).
+18. **Bypass policy** for `sync.your-domain.com` (apps), gated by device/WARP/mTLS as needed.  
+19. **Mild policy** for `share.your-domain.com` (public links).
 
 ### F. Health & Observability
 20. **`cloudflared` status/logs** on the host; **Zero Trust → Logs** for Access/mTLS decisions.  
@@ -201,13 +201,13 @@ flowchart LR
 
 - **mTLS block (no client cert):**
   ```bash
-  curl -Ik https://cloud.your-domain.om
+  curl -Ik https://cloud.your-domain.com
   # Expect: 403 at edge
   ```
 
 - **mTLS pass + Access redirect (with P12):**
   ```bash
-  curl -Ik --cert client.p12 --cert-type P12 --pass "<p12_password>" https://cloud.your-domain.om
+  curl -Ik --cert client.p12 --cert-type P12 --pass "<p12_password>" https://cloud.your-domain.com
   # Expect: 302 → /cdn-cgi/access/login/...
   ```
 
@@ -218,7 +218,7 @@ flowchart LR
   ```
 
 - **Sync path (bypass Access):**
-  App connects to `https://sync.your-domain.om` under your policy (mTLS/device posture), then Tunnel → Nginx → Cloud.
+  App connects to `https://sync.your-domain.com` under your policy (mTLS/device posture), then Tunnel → Nginx → Cloud.
 
 ---
 
@@ -237,7 +237,7 @@ flowchart LR
 
 **Block unless mTLS is verified & serial is allowlisted (optional serial clause):**
 ```txt
-(http.host eq "cloud.your-domain.om"
+(http.host eq "cloud.your-domain.com"
  and not (
    cf.tls_client_auth.cert_verified
    and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
@@ -247,7 +247,7 @@ flowchart LR
 
 **Variant with Issuer check (safer):**
 ```txt
-(http.host eq "cloud.your-domain.om"
+(http.host eq "cloud.your-domain.com"
  and not (
    cf.tls_client_auth.cert_verified
    and lower(cf.tls_client_auth.cert_issuer_dn) contains "your client ca name"
@@ -256,4 +256,4 @@ flowchart LR
 )
 ```
 
-> Replace `your-domain.om` accordingly; adjust the allowlist to your actual serial(s) and issuer.
+> Replace `your-domain.com` accordingly; adjust the allowlist to your actual serial(s) and issuer.
