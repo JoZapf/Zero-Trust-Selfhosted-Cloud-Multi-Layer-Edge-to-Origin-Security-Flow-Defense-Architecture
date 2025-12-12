@@ -237,21 +237,13 @@ flowchart LR
 
 > All examples assume the **rule action = Block**.  
 > A request is blocked if the expression evaluates to `true`.
-
-> ⚠️ Note: Comment lines starting with `#` are for documentation only.  
-> Remove them before pasting into the Cloudflare WAF expression editor.
-
 ---
-
 ### 1. Minimal: Require any valid (non-revoked) mTLS client certificate
-
 Blocks every request to `cloud.your-domain.com` that **does not** present a valid,
 non-revoked client certificate.
-
 ### Block if:
   - Host is cloud.your-domain.com
   - AND EITHER no valid client cert is present OR the cert is revoked
-
 ### Effectively: "Only requests with a verified AND non-revoked client cert are allowed through."
 ```txt
 (http.host eq "cloud.your-domain.com"
@@ -261,7 +253,6 @@ non-revoked client certificate.
  )
 )
 ```
-
 ### Block if:
   - Host is cloud.your-domain.com
   - AND the request does NOT match the "allowed mTLS client" condition below.
@@ -270,7 +261,6 @@ non-revoked client certificate.
   - cert_verified = true
   - cert_revoked = false
   - cert_serial (lowercased) is in the allowlist set
-
 ```txt
 (http.host eq "cloud.your-domain.com"
  and not (
@@ -286,13 +276,11 @@ non-revoked client certificate.
 ### Block if:
   - Host is cloud.your-domain.com
   - AND the request does NOT match the "allowed mTLS client from correct CA" condition.
-
 ### Allowed mTLS client from correct CA condition:
   - cert_verified = true
   - cert_revoked = false
   - cert_issuer_dn (lowercased) contains an identifying substring of your CA
   - cert_serial (lowercased) is in the allowlist set
-
 ### Replace:
   - "your client ca name" with a distinctive part of your CA's issuer DN
   - the serials below with your real lowercased serial numbers
@@ -309,7 +297,3 @@ non-revoked client certificate.
  )
 )
 ```
-
-```
-
-> Replace `your-domain.com` accordingly; adjust the allowlist to your actual serial(s) and issuer.
