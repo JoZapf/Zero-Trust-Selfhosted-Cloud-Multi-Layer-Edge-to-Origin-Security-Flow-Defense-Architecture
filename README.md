@@ -77,7 +77,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 > Replace `your-domain.om` with your domain (e.g., `your-domain.om`).
 
-```mermain
+```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
     C1["cloud.your-domain.com"]
