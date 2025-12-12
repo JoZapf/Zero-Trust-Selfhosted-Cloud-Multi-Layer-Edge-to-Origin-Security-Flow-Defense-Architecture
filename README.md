@@ -3,6 +3,28 @@
 A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** behind **Cloudflare**. Traffic is forced through **proxied DNS**, **mTLS at the edge**, **Cloudflare Access** (OTP/session), and an **egress‑only Cloudflare Tunnel** to an origin where **Nginx** front-ends Cloud in **Docker** with **explicit trust anchors** and **micro‑segmented backends**.
 
 ---
+<p align="center">
+  <a href="#architecture-overview">
+    <img alt="Architecture" src="https://img.shields.io/badge/architecture-zero--trust-blue?style=for-the-badge">
+  </a>
+  <a href="#core-benefits-osi--defense-in-depth">
+    <img alt="Defense in Depth" src="https://img.shields.io/badge/defense--in--depth-multi--layered-purple?style=for-the-badge">
+  </a>
+  <a href="#environment--assumptions">
+    <img alt="Edge" src="https://img.shields.io/badge/edge-Cloudflare%20%2B%20Tunnel-orange?style=for-the-badge">
+  </a>
+  <a href="#clean-runbook-step-by-step">
+    <img alt="Runbook" src="https://img.shields.io/badge/runbook-included-success?style=for-the-badge">
+  </a>
+  <a href="docs/zerotrust_flow_anonymized_v2.svg">
+    <img alt="Diagram" src="https://img.shields.io/badge/diagram-sequence--flow-informational?style=for-the-badge">
+  </a>
+  <a href="#security-notes--best-practices">
+    <img alt="Hardening Focus" src="https://img.shields.io/badge/focus-hardening-critical?style=for-the-badge">
+  </a>
+</p>
+
+---
 
 ## Table of Contents
 - [Architecture Overview](#architecture-overview)
