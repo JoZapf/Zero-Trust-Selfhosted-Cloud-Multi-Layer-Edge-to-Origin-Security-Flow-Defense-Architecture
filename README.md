@@ -233,15 +233,22 @@ flowchart LR
 
 ---
 
-## Appendix: Example Cloudflare Rules
+## Appendix: Example Cloudflare mTLS WAF Rules
 
-**Block unless mTLS is verified & serial is allowlisted (optional serial clause):**
+> The examples below assume the **action = Block**.  
+> A request is blocked if the expression evaluates to `true`.
+
+### 1. Minimal: Require any valid (non-revoked) mTLS client certificate
+
+Blocks every request to `cloud.your-domain.com` that **does not** present a valid,
+nicht widerrufenes Client-Zertifikat.
+
 ```txt
 (http.host eq "cloud.your-domain.com"
- and not (
-   cf.tls_client_auth.cert_verified
-   and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
-  )
+ and (
+   not cf.tls_client_auth.cert_verified
+   or cf.tls_client_auth.cert_revoked
+ )
 )
 ```
 
@@ -250,10 +257,15 @@ flowchart LR
 (http.host eq "cloud.your-domain.com"
  and not (
    cf.tls_client_auth.cert_verified
+   and not cf.tls_client_auth.cert_revoked
    and lower(cf.tls_client_auth.cert_issuer_dn) contains "your client ca name"
-   and lower(cf.tls_client_auth.cert_serial) in {"123456789123456789123456789"}
-  )
+   and lower(cf.tls_client_auth.cert_serial) in {
+     "123456789123456789123456789"
+     "123456789123456789123456789"
+   }
+ )
 )
+
 ```
 
 > Replace `your-domain.com` accordingly; adjust the allowlist to your actual serial(s) and issuer.
