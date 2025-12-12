@@ -248,11 +248,11 @@ flowchart LR
 Blocks every request to `cloud.your-domain.com` that **does not** present a valid,
 non-revoked client certificate.
 
-# Block if:
-#  - Host is cloud.your-domain.com
-#  - AND EITHER no valid client cert is present OR the cert is revoked
-#
-# Effectively: "Only requests with a verified AND non-revoked client cert are allowed through."
+### Block if:
+  - Host is cloud.your-domain.com
+  - AND EITHER no valid client cert is present OR the cert is revoked
+
+### Effectively: "Only requests with a verified AND non-revoked client cert are allowed through."
 ```txt
 (http.host eq "cloud.your-domain.com"
  and (
@@ -262,14 +262,15 @@ non-revoked client certificate.
 )
 ```
 
-# Block if:
-#  - Host is cloud.your-domain.com
-#  - AND the request does NOT match the "allowed mTLS client" condition below.
-#
-# Allowed mTLS client condition (inside the NOT (...)):
-#  - cert_verified = true
-#  - cert_revoked = false
-#  - cert_serial (lowercased) is in the allowlist set
+### Block if:
+  - Host is cloud.your-domain.com
+  - AND the request does NOT match the "allowed mTLS client" condition below.
+
+### Allowed mTLS client condition (inside the NOT (...)):
+  - cert_verified = true
+  - cert_revoked = false
+  - cert_serial (lowercased) is in the allowlist set
+
 ```txt
 (http.host eq "cloud.your-domain.com"
  and not (
@@ -282,19 +283,19 @@ non-revoked client certificate.
  )
 )
 ```
-# Block if:
-#  - Host is cloud.your-domain.com
-#  - AND the request does NOT match the "allowed mTLS client from correct CA" condition.
-#
-# Allowed mTLS client from correct CA condition:
-#  - cert_verified = true
-#  - cert_revoked = false
-#  - cert_issuer_dn (lowercased) contains an identifying substring of your CA
-#  - cert_serial (lowercased) is in the allowlist set
-#
-# Replace:
-#  - "your client ca name" with a distinctive part of your CA's issuer DN
-#  - the serials below with your real lowercased serial numbers
+### Block if:
+  - Host is cloud.your-domain.com
+  - AND the request does NOT match the "allowed mTLS client from correct CA" condition.
+
+### Allowed mTLS client from correct CA condition:
+  - cert_verified = true
+  - cert_revoked = false
+  - cert_issuer_dn (lowercased) contains an identifying substring of your CA
+  - cert_serial (lowercased) is in the allowlist set
+
+### Replace:
+  - "your client ca name" with a distinctive part of your CA's issuer DN
+  - the serials below with your real lowercased serial numbers
 ```txt
 (http.host eq "cloud.your-domain.com"
  and not (
