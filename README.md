@@ -10,7 +10,7 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
   <a href="#core-benefits-osi--defense-in-depth">
     <img alt="Defense in Depth" src="https://img.shields.io/badge/defense--in--depth-multi--layered-purple?style=for-the-badge">
   </a>
-  <a href="#environment--assumptions">
+  <a href="#environment">
     <img alt="Edge" src="https://img.shields.io/badge/edge-Cloudflare%20%2B%20Tunnel-orange?style=for-the-badge">
   </a>
   <a href="#clean-runbook-step-by-step">
@@ -29,7 +29,7 @@ A practical, reproducible **Zero‑Trust** pattern for **self-hosted Cloud** beh
 ## Table of Contents
 - [Architecture Overview](#architecture-overview)
 - [Core Benefits (OSI × Defense-in-Depth)](#core-benefits-osi--defense-in-depth)
-- [Environment & Assumptions](#environment--assumptions)
+- [Environment](#environment)
 - [Clean Runbook (Step-by-Step)](#clean-runbook-step-by-step)
 - [Verification & Tests](#verification--tests)
 - [Security Notes & Best Practices](#security-notes--best-practices)
@@ -68,7 +68,7 @@ Origin exposure is eliminated: **no inbound ports** on the host, **deny-by-defau
 
 ---
 
-## Environment & Assumptions
+## Environment
 
 - **DNS & Proxy:** Managed in Cloudflare; records **proxied** (orange cloud).  
 - **Hostnames:** `cloud.your-domain.com` (browser), `sync.your-domain.com` (apps), `share.your-domain.com` (public links).  
