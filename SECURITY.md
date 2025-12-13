@@ -116,12 +116,13 @@ flowchart LR
 
 ---
 
-### Zero-Trust Comparison: Registration Plane vs. Data/Sync Plane (with mTLS on both hosts)
-
-
+### Zero-Trust Comparison: Registration Plane vs. Data/Sync Plane
+>cloud.your-domain.com → Registration Plane (browser login, mTLS + OTP + 2FA)
+>sync.your-domain.com → Data / Sync Plane (app/sync access with mTLS)
+---
 | Plane / Layer                | Host                  | Device Trust                                                                                                          | User / Account Trust                                                                                                             | Zero-Trust Meaning                                                                                                                                                                                                                  |
 |-----------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Registration Plane**      | `cloud.your-domain.com` | Enforced via **mTLS** (client certificates + serial allowlist).                                                      | **User trust:** Cloudflare Access / OTP<br>**Account trust:** Nextcloud login + 2FA                                             | Only known, certificate-bound devices are allowed to issue new session / app tokens. Entry into the system is tightly bound to the specific device and user identity (strong registration perimeter).                                |
 | **Data / Sync Plane (mTLS)**| `sync.your-domain.com`  | Also enforced via **mTLS** (client certificates + serial allowlist); every sync request is bound to a specific device. | **User / account trust:** App token (app password) **plus** WAF (rate limits, UA filters, geo/IP filters) as an additional layer. | Runtime access is both **token-bound** and **device-bound**. A compromised token alone is not sufficient – without the corresponding device certificate, the mTLS policy blocks access. This further reduces the per-account/per-device attack surface. |
 
-
+---
