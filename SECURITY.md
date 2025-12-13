@@ -118,6 +118,7 @@ flowchart LR
 
 ### Zero-Trust Comparison: Registration Plane vs. Data/Sync Plane
 >cloud.your-domain.com → Registration Plane (browser login, mTLS + OTP + 2FA)
+
 >sync.your-domain.com → Data / Sync Plane (app/sync access with mTLS)
 ---
 | Plane / Layer                | Host                  | Device Trust                                                                                                          | User / Account Trust                                                                                                             | Zero-Trust Meaning                                                                                                                                                                                                                  |
