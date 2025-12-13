@@ -18,9 +18,9 @@ flowchart TB
 
     %% Public DNS / Cloudflare
     subgraph CF_DNS["Public DNS / Cloudflare Zone"]
-        DNSCloud["cloud.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;.cfargotunnel.com"]
-        DNSSync["sync.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;.cfargotunnel.com"]
-        DNSShare["share.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;.cfargotunnel.com"]
+        DNSCloud["cloud.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;<br>.cfargotunnel.com"]
+        DNSSync["sync.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;<br>.cfargotunnel.com"]
+        DNSShare["share.your-domain.com<br>CNAME -><br>&lt;tunnel-id&gt;<br>.cfargotunnel.com"]
     end
 
     subgraph CF_EDGE["Cloudflare Edge (443/tcp)"]
@@ -105,5 +105,4 @@ flowchart TB
     %% App → Redis / DB
     NCApp -->|"TCP 6379"| Redis
     NCApp -->|"TCP 3306"| DBService
-
 ```
