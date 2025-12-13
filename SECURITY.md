@@ -116,6 +116,7 @@ flowchart LR
 - **B7 – Share WAF:** Strong focus on `/s/<token>` paths with hard rate limiting – reduces the risk of token brute force attacks and misuse of public links.
 - **B8 – Isolated Share Scope:** Public access is logically separated from `cloud.your-domain.com` – attacks on shares do not directly affect the hardened login frontend.
 
+### Zero-Trust Comparison: Registration Plane vs. Data/Sync Plane (with mTLS on both hosts)
 
 | Plane / Layer                | Host                  | Device Trust                                                                                                          | User / Account Trust                                                                                                             | Zero-Trust Meaning                                                                                                                                                                                                                  |
 |-----------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
