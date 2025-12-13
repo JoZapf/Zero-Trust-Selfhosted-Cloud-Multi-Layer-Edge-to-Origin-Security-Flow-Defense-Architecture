@@ -82,12 +82,10 @@ flowchart LR
     SAPP -->|Token invalid / revoked| SBlock2
 ```
 - **B5 – API/Sync WAF:**  
-  Separation of UI and machine access; targeted limits and signatures for app traffic  
-  (paths, user agent, rate limits, geo/IP) instead of generic web rules.
+  Separation of UI and machine access; targeted limits and signatures for app traffic (paths, user agent, rate limits, geo/IP) instead of generic web rules.
 
 - **B6 – App passwords & tokens:**  
-  Device- and app-specific credentials, independent of the main login  
-  (scoped credentials, easy revocation of individual devices).
+  Device- and app-specific credentials, independent of the main login (scoped credentials, easy revocation of individual devices).
 
 
 ## share.yourdomain.com
