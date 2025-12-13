@@ -51,8 +51,8 @@ flowchart TB
 
     %% Docker network / application layer
     subgraph DOCKER_NET["Docker Network: internal only"]
-        subgraph APP["Nextcloud App Container"]
-            NCApp["cloud-app:80<br>PHP/Apache, Nextcloud"]
+        subgraph APP["Cloud App Container"]
+            NCApp["cloud-app:80<br>PHP/Apache, Cloud"]
         end
 
         subgraph REDIS["Redis Container"]
@@ -60,7 +60,7 @@ flowchart TB
         end
 
         subgraph DB["DB Container"]
-            DBService["mariadb:3306<br>Nextcloud DB"]
+            DBService["mariadb:3306<br>Cloud DB"]
         end
     end
 
