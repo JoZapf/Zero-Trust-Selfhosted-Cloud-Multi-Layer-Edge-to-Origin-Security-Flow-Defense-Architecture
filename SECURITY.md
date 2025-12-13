@@ -55,27 +55,40 @@ flowchart LR
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
-    SClient["sync.your-domain.com /<br>Cloud- & Service-Apps"]
+    SClient["sync.your-domain.com /<br>Cloud & Service Apps"]
     SCF["Cloudflare Edge"]
-    SWAF["WAF API/Sync Policy (B5)"]
+    SmTLS["mTLS Client Auth<br>(Device Trust)"]
+    SWAF["WAF API/Sync Policy (B5)<br>Rate Limits, UA, Geo/IP"]
     STunnel["Cloudflare Tunnel"]
     SNGINX["Cloud-Nginx"]
-    SAPP["Cloud App WebDAV/Sync (B6)"]
+    SAPP["Nextcloud WebDAV / Sync (B6)<br>App Passwords / Tokens"]
     SAccess["Sync Successful"]
 
-    SBlock1["BLOCK: WAF Ratelimit/Signature"]
-    SBlock2["BLOCK: Cloud Auth Error"]
+    SBlock0["BLOCK: mTLS failed / no client cert"]
+    SBlock1["BLOCK: WAF Ratelimit / Signature"]
+    SBlock2["BLOCK: Cloud Auth Error<br>(Token invalid / revoked)"]
 
     SClient -->|HTTPS Request| SCF
-    SCF --> SWAF
-    SWAF -->|Suspicious Traffic / DoS| SBlock1
+    SCF --> SmTLS
+
+    SmTLS -->|Client cert OK| SWAF
+    SmTLS -->|No / invalid cert| SBlock0
+
+    SWAF -->|Suspicious traffic / DoS| SBlock1
     SWAF --> STunnel
     STunnel --> SNGINX --> SAPP
+
     SAPP -->|Token valid| SAccess
-    SAPP -->|Token Invalid / Revoke| SBlock2
+    SAPP -->|Token invalid / revoked| SBlock2
 ```
-- **B5 – API/Sync WAF:** Separation of UI and machine access; targeted limits and signatures for app traffic (paths, user agent, rate limits) instead of generic web rules.
-- **B6 – App passwords & tokens:** Device- and app-specific credentials, independent of the main login (scoped credentials, easy revocation of individual devices).
+- **B5 – API/Sync WAF:**  
+  Separation of UI and machine access; targeted limits and signatures for app traffic  
+  (paths, user agent, rate limits, geo/IP) instead of generic web rules.
+
+- **B6 – App passwords & tokens:**  
+  Device- and app-specific credentials, independent of the main login  
+  (scoped credentials, easy revocation of individual devices).
+
 
 ## share.yourdomain.com
 ```mermaid
@@ -103,5 +116,10 @@ flowchart LR
 - **B7 – Share WAF:** Strong focus on `/s/<token>` paths with hard rate limiting – reduces the risk of token brute force attacks and misuse of public links.
 - **B8 – Isolated Share Scope:** Public access is logically separated from `cloud.your-domain.com` – attacks on shares do not directly affect the hardened login frontend.
 
+
+| Plane / Layer                | Host                  | Device Trust                                                                                                          | User / Account Trust                                                                                                             | Zero-Trust Meaning                                                                                                                                                                                                                  |
+|-----------------------------|-----------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Registration Plane**      | `cloud.sine-math.com` | Enforced via **mTLS** (client certificates + serial allowlist).                                                      | **User trust:** Cloudflare Access / OTP<br>**Account trust:** Nextcloud login + 2FA                                             | Only known, certificate-bound devices are allowed to issue new session / app tokens. Entry into the system is tightly bound to the specific device and user identity (strong registration perimeter).                                |
+| **Data / Sync Plane (mTLS)**| `sync.sine-math.com`  | Also enforced via **mTLS** (client certificates + serial allowlist); every sync request is bound to a specific device. | **User / account trust:** App token (app password) **plus** WAF (rate limits, UA filters, geo/IP filters) as an additional layer. | Runtime access is both **token-bound** and **device-bound**. A compromised token alone is not sufficient – without the corresponding device certificate, the mTLS policy blocks access. This further reduces the per-account/per-device attack surface. |
 
 
