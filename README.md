@@ -38,7 +38,7 @@ A practical, reproducible **Zero-Trust** pattern for a **self-hosted Cloud** beh
 ---
 
 <p align="center">
-  <img src="docs/zerotrust_flow_anonymized_v2.svg" width="1100" alt="Zero-Trust Edge-to-Origin Flow Diagram">
+  <img src="docs/zerotrust_flow_anonymized_v4.svg" width="1100" alt="Zero-Trust Edge-to-Origin Flow Diagram">
 </p>
 
 ---
