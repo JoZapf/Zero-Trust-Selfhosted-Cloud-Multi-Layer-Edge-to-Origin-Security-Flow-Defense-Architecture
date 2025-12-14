@@ -33,7 +33,7 @@ A practical, reproducible **Zero-Trust** pattern for a **self-hosted Cloud** beh
 - [Clean Runbook (Step-by-Step)](#clean-runbook-step-by-step)
 - [Verification & Tests](#verification--tests)
 - [Security Notes & Best Practices](#security-notes--best-practices)
-- [Appendix: Example Cloudflare Rules](#appendix-example-cloudflare-rules)
+- [Appendix: Example Cloudflare mTLS WAF Rules](#appendix-example-cloudflare-mtls-waf-rules)
 
 ---
 
