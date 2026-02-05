@@ -14,3 +14,4 @@
 # Allow docs/ and everything inside
 !docs/
 !docs/**
+!docs/Zero-Trust-Selfhosted-Cloud-Multi-Layer-Edge-to-Origin-Security-Flow-Defense-Architecture.jpg

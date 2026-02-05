@@ -16,7 +16,7 @@ A practical, reproducible **Zero-Trust** pattern for a **self-hosted Cloud** beh
   <a href="#clean-runbook-step-by-step">
     <img alt="Runbook" src="https://img.shields.io/badge/runbook-included-success?style=for-the-badge">
   </a>
-  <a href="docs/zerotrust_flow_anonymized_v2.svg">
+  <a href="docs/zerotrust_flow_anonymized_v4.svg">
     <img alt="Diagram" src="https://img.shields.io/badge/diagram-sequence--flow-informational?style=for-the-badge">
   </a>
   <a href="#security-notes--best-practices">
